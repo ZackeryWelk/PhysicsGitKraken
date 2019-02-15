@@ -9,7 +9,7 @@ Rigidbody::Rigidbody(ShapeType shapeID, glm::vec2 position, glm::vec2 velocity, 
 	m_rotation = rotation;
 	m_mass = mass;
 	m_elasticity = 1;
-	m_linearDrag = 0.1f;
+	m_linearDrag = 0.01f;
 	m_friction = 0.2;
 }
 
