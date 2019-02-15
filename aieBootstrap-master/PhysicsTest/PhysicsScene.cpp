@@ -166,11 +166,12 @@ bool PhysicsScene::sphere2Plane(PhysicsObject* obj1, PhysicsObject* obj2)
 		float sphereToPlane = glm::dot(sphere->getPosition(), plane->getNormal()) - plane->getDistance();
 
 		//if we are behind plane then we flip the normal
-		if (sphereToPlane < 0)
-		{
-			collisionNormal *= -1;
-			sphereToPlane *= -1;
-		}
+		//activate this to allow collision from one side (will need to change restitution)
+		//if (sphereToPlane < 0)
+		//{
+		//	collisionNormal *= -1;
+		//	sphereToPlane *= -1;
+		//}
 
 		float intersection = sphere->getRadius() - sphereToPlane;
 		if (intersection > 0)
