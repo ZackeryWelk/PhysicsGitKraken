@@ -162,9 +162,10 @@ bool PhysicsScene::sphere2Plane(PhysicsObject* obj1, PhysicsObject* obj2)
 	//if this check is successful then test for collision
 	if (sphere != nullptr && plane != nullptr)
 	{
+		sphere->SetLinearDrag(0.2);
 		glm::vec2 collisionNormal = plane->getNormal();
 		float sphereToPlane = glm::dot(sphere->getPosition(), plane->getNormal()) - plane->getDistance();
-
+		
 		//if we are behind plane then we flip the normal
 		//activate this to allow collision from one side (will need to change restitution)
 		//if (sphereToPlane < 0)
@@ -179,8 +180,10 @@ bool PhysicsScene::sphere2Plane(PhysicsObject* obj1, PhysicsObject* obj2)
 			sphere->setPosition(sphere->getPosition() + collisionNormal * intersection);
 
 			plane->resolveCollision(sphere);
+			sphere->SetLinearDrag(0.01);
 			return true;
 		}
+		
 	}
 	return false;
 }
@@ -221,6 +224,21 @@ bool PhysicsScene::sphere2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 
 bool PhysicsScene::box2Plane(PhysicsObject* obj1, PhysicsObject* obj2)
 {
+	Square *box = dynamic_cast<Square*>(obj1);
+	Plane *plane = dynamic_cast<Plane*>(obj2);
+
+	if (box != nullptr && plane != nullptr)
+	{
+		float vert1 = glm::dot(box->getPosition() - box->getExtents().x + box->getExtents().y, plane->getNormal() - plane->getDistance());
+		float vert2 = glm::dot(box->getPosition() + box->getExtents().x + box->getExtents().y, plane->getNormal() - plane->getDistance());
+		float vert3 = glm::dot(box->getPosition() - box->getExtents().x - box->getExtents().y, plane->getNormal() - plane->getDistance());
+		float vert4 = glm::dot(box->getPosition() + box->getExtents().x - box->getExtents().y, plane->getNormal() - plane->getDistance());
+
+		if (vert1 < 0 || vert2 < 0 || vert3 < 0 || vert4 < 0)
+		{
+			plane->resolveCollision(box);
+		}
+	}
 	return false;
 }
 
@@ -237,12 +255,21 @@ bool PhysicsScene::box2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 
 	if (box1 != nullptr && box2 != nullptr)
 	{
-	//	if ()
-	//	{
-	//		box1->stop();
-	//		box2->stop();
-	//		return true;
-	//	}
+		if (box1->getPosition().x + box1->getExtents().x < box2->getPosition().x -box2->getExtents().x ||
+			box2->getPosition().x + box2->getExtents().x < box1->getPosition().x -box1->getExtents().x)
+		{
+			return false;
+		}
+		if (box1->getPosition().y + box1->getExtents().y < box2->getPosition().y -box2->getExtents().y ||
+			box2->getPosition().y + box2->getExtents().y < box1->getPosition().y -box1->getExtents().y)
+		{
+			return false;
+		}
+		else
+		{
+			box1->resolveCollision(box2);
+			return true;
+		}
 	}
 	return false;
 }
