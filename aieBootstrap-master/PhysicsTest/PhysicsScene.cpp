@@ -241,8 +241,8 @@ bool PhysicsScene::sphere2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 
 		if (sphere->getPosition().x + sphere->getRadius() < box->getPosition().x - box->getExtents().x ||
 			sphere->getPosition().y + sphere->getRadius() < box->getPosition().y - box->getExtents().y ||
-			sphere->getPosition().x + sphere->getRadius() > box->getPosition().x + box->getExtents().x ||
-			sphere->getPosition().y + sphere->getRadius() > box->getPosition().y + box->getExtents().y)
+			sphere->getPosition().x - sphere->getRadius() > box->getPosition().x + box->getExtents().x ||
+			sphere->getPosition().y - sphere->getRadius() > box->getPosition().y + box->getExtents().y)
 		{
 			return false;
 		}

@@ -84,8 +84,8 @@ bool PhysicsTestApp::startup() {
 	m_physicsScene->addActor(box2);
 
 
-	box1->applyForce(glm::vec2(30, 0));
-	box2->applyForce(glm::vec2(-30, 0));
+	box1->applyForce(glm::vec2(40, 0));
+	box2->applyForce(glm::vec2(-40, 0));
 
 
 	return true;
