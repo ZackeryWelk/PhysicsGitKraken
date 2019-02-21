@@ -23,7 +23,7 @@ bool PhysicsTestApp::startup() {
 	m_font = new aie::Font("../bin/font/consolas.ttf", 32);
 
 	m_physicsScene = new PhysicsScene();
-	m_physicsScene->setGravity(glm::vec2(0, 0));
+	m_physicsScene->setGravity(glm::vec2(0, -10));
 	m_physicsScene->setTimeStep(0.01f);
 
 
@@ -76,19 +76,18 @@ bool PhysicsTestApp::startup() {
 
 	m_physicsScene->addActor(plane5);
 
-
-	Square* box1 = new Square(glm::vec2(50, 40), glm::vec2(0, 0), 4.0f, glm::vec2(4, 4), glm::vec4(0, 0, 1, 1));
-	//Square* box2 = new Square(glm::vec2(70, 40), glm::vec2(0, 0), 4.0f, glm::vec2(3, 4), glm::vec4(0, 0, 1, 1));
+	Square* box1 = new Square(glm::vec2(35, 40), glm::vec2(0, 0), 4.0f, glm::vec2(4, 4), glm::vec4(0, 0, 1, 1));
+	Square* box2 = new Square(glm::vec2(65, 40), glm::vec2(0, 0), 4.0f, glm::vec2(4, 4), glm::vec4(0, 0, 1, 1));
 
 
 	m_physicsScene->addActor(box1);
-	//m_physicsScene->addActor(box2);
+	m_physicsScene->addActor(box2);
 
 
 	box1->applyForce(glm::vec2(20, 0));
-	//box2->applyForce(glm::vec2(-20, 0));
+	box2->applyForce(glm::vec2(-20, 0));
 
-	
+
 	return true;
 }
 
@@ -129,7 +128,6 @@ void PhysicsTestApp::update(float deltaTime) {
 	//turn off to draw without deleting previous stuff
 
 	aie::Gizmos::clear();
-
 
 
 	m_physicsScene->update(deltaTime);
