@@ -6,7 +6,6 @@ PhysicsScene::PhysicsScene() : m_timeStep(0.01f), m_gravity(glm::vec2(0,0))
 {
 }
 
-
 PhysicsScene::~PhysicsScene()
 {
 	for (auto pActor : m_actors)
@@ -172,9 +171,6 @@ bool PhysicsScene::plane2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 	return false;
 }
 
-
-
-
 bool PhysicsScene::sphere2Plane(PhysicsObject* obj1, PhysicsObject* obj2)
 {
 	Sphere *sphere = dynamic_cast<Sphere*>(obj1);
@@ -242,17 +238,6 @@ bool PhysicsScene::sphere2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 
 	if (sphere != nullptr && box != nullptr)
 	{
-		glm::vec2 topLeft		= box->getPosition() - box->getExtents().x + box->getExtents().y;
-		glm::vec2 topRight		= box->getPosition() + box->getExtents().x + box->getExtents().y;
-		glm::vec2 bottomLeft	= box->getPosition() - box->getExtents().x - box->getExtents().y;
-		glm::vec2 bottomRight	= box->getPosition() + box->getExtents().x - box->getExtents().y;
-
-
-		glm::vec2 top		= glm::clamp(sphere->getPosition(), topLeft, topRight);
-		glm::vec2 right		= glm::clamp(sphere->getPosition(), topRight, bottomRight);
-		glm::vec2 bottom	= glm::clamp(sphere->getPosition(), bottomLeft, bottomRight);
-		glm::vec2 left		= glm::clamp(sphere->getPosition(), bottomLeft, topLeft);
-
 
 		if (sphere->getPosition().x + sphere->getRadius() < box->getPosition().x - box->getExtents().x ||
 			sphere->getPosition().y + sphere->getRadius() < box->getPosition().y - box->getExtents().y ||
@@ -269,9 +254,6 @@ bool PhysicsScene::sphere2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 	}
 	return false;
 }
-
-
-
 
 bool PhysicsScene::box2Plane(PhysicsObject* obj1, PhysicsObject* obj2)
 {
@@ -292,8 +274,6 @@ bool PhysicsScene::box2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 
 	if (box1 != nullptr && box2 != nullptr)
 	{
-		box1->SetLinearDrag(0.2);
-		box2->SetLinearDrag(0.2);
 
 	//	float overlapX = (box1->getPosition().x + box1->getExtents().x) + (box2->getPosition().x + box2->getExtents().x)
 	//					- glm::distance(box1->getPosition().x + box1->getExtents().x, box2->getPosition().x + box2->getExtents().x);
@@ -323,8 +303,6 @@ bool PhysicsScene::box2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 
 			box1->resolveCollision(box2);
 
-			box1->SetLinearDrag(0.01);
-			box2->SetLinearDrag(0.01);
 			return true;
 		}
 	}
