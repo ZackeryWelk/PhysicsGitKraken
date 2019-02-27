@@ -158,45 +158,49 @@ bool PhysicsScene::plane2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 		float X = box->getExtents().x;
 		float y = box->getExtents().y;
 
-		glm::vec2 topLeft		(box->getPosition().x - box->getExtents().x,		box->getPosition().y + box->getExtents().y);
-		glm::vec2 topRight		(box->getPosition().x + box->getExtents().x,		box->getPosition().y + box->getExtents().y);
-		glm::vec2 BottomLeft	(box->getPosition().x - box->getExtents().x,		box->getPosition().y - box->getExtents().y);
-		glm::vec2 BottomRight	(box->getPosition().x + box->getExtents().x,		box->getPosition().y - box->getExtents().y);
+		glm::vec2 topLeft		(box->getPosition().x - box->getExtents().x /4, box->getPosition().y + box->getExtents().y/4);
+		glm::vec2 topRight		(box->getPosition().x + box->getExtents().x /4, box->getPosition().y + box->getExtents().y/4);
+		glm::vec2 BottomLeft	(box->getPosition().x - box->getExtents().x /4, box->getPosition().y - box->getExtents().y/4);
+		glm::vec2 BottomRight	(box->getPosition().x + box->getExtents().x /4, box->getPosition().y - box->getExtents().y/4);
 
 		float tLPlane = glm::dot(topLeft, plane->getNormal()) - plane->getDistance();
 		float tRPlane = glm::dot(topRight, plane->getNormal()) - plane->getDistance();
 		float bLPlane = glm::dot(BottomLeft, plane->getNormal()) - plane->getDistance();
 		float bRPlane = glm::dot(BottomRight, plane->getNormal()) - plane->getDistance();
 
-		float intersectionX = X - tRPlane;
-		float intersectionY = y - bRPlane;
+		float intersectionRX = X - tRPlane;
+		float intersectionRY = y - bRPlane;
+		float intersectionLX = X - tLPlane;
+		float intersectionLY = y - bLPlane;
 
-		if (intersectionX < 0 || intersectionY < 0)
+		if (intersectionRX > 0)
 		{
+			box->setPosition(box->getPosition() + collisionNormal * intersectionRX);
 			plane->resolveCollision(box);
 			box->SetLinearDrag(0.3);
 			return true;
 		}
-
-
-
-
-
-
-
-		//float boxToPlane = glm::dot(box->getPosition(), plane->getNormal()) - plane->getDistance();
-
-		//float intersectionX = box->getExtents().x - boxToPlane;
-		//float intersectionY = box->getExtents().y - boxToPlane;
-	
-		//if (intersectionX > 0 || intersectionY > 0)
-		//{		
-		//	box->setPosition(box->getPosition() + (collisionNormal * intersectionX) + (collisionNormal * intersectionY));
-		//	plane->resolveCollision(box);
-		//	box->SetLinearDrag(0.3);
-		//	return true;
-		//}
-	
+		else if (intersectionRY > 0)
+		{
+			box->setPosition(box->getPosition() + collisionNormal * intersectionRY);
+			plane->resolveCollision(box);
+			box->SetLinearDrag(0.3);
+			return true;
+		}
+		else if (intersectionLX > 0)
+		{
+			box->setPosition(box->getPosition() + collisionNormal * intersectionLX);
+			plane->resolveCollision(box);
+			box->SetLinearDrag(0.3);
+			return true;
+		}
+		else if (intersectionLY > 0)
+		{
+			box->setPosition(box->getPosition() + collisionNormal * intersectionLY);
+			plane->resolveCollision(box);
+			box->SetLinearDrag(0.3);
+			return true;
+		}
 	}			
 	return false;
 }
@@ -209,6 +213,8 @@ bool PhysicsScene::sphere2Plane(PhysicsObject* obj1, PhysicsObject* obj2)
 	//if this check is successful then test for collision
 	if (sphere != nullptr && plane != nullptr)
 	{
+
+
 		sphere->SetLinearDrag(0.01);
 		glm::vec2 collisionNormal = plane->getNormal();
 		float sphereToPlane = glm::dot(sphere->getPosition(), plane->getNormal()) - plane->getDistance();
@@ -269,18 +275,82 @@ bool PhysicsScene::sphere2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 	if (sphere != nullptr && box != nullptr)
 	{
 
-		if (sphere->getPosition().x + sphere->getRadius() < box->getPosition().x - box->getExtents().x ||
-			sphere->getPosition().y + sphere->getRadius() < box->getPosition().y - box->getExtents().y ||
-			sphere->getPosition().x - sphere->getRadius() > box->getPosition().x + box->getExtents().x ||
-			sphere->getPosition().y - sphere->getRadius() > box->getPosition().y + box->getExtents().y)
+		
+		glm::vec2 topRight		(box->getPosition().x + box->getExtents().x , box->getPosition().y + box->getExtents().y);
+		glm::vec2 BottomLeft	(box->getPosition().x - box->getExtents().x , box->getPosition().y - box->getExtents().y);
+
+		glm::vec2 closestPoint = glm::clamp(sphere->getPosition(), BottomLeft, topRight);
+
+		glm::vec2 displacement = sphere->getPosition() - closestPoint;
+
+		float overlap = sphere->getRadius() - glm::length(displacement);
+
+		if ( overlap > 0)
 		{
-			return false;
-		}
-		else
-		{
+			glm::vec2 offset = glm::normalize(displacement) * overlap;
+
+			sphere->setPosition(sphere->getPosition() + offset * 0.5f);
+			box->setPosition(box->getPosition() - offset * 0.5f);
 			sphere->resolveCollision(box);
-			return true;
 		}
+
+		
+
+		/*old circle / aabb*/
+		//glm::vec2 topRight	(box->getPosition().x + box->getExtents().x, box->getPosition().y + box->getExtents().y);
+		//glm::vec2 topLeft		(box->getPosition().x - box->getExtents().x , box->getPosition().y + box->getExtents().y);
+		//glm::vec2 BottomLeft	(box->getPosition().x - box->getExtents().x, box->getPosition().y - box->getExtents().y);
+		//glm::vec2 BottomRight	(box->getPosition().x + box->getExtents().x , box->getPosition().y - box->getExtents().y);
+		//
+		//glm::vec2 displacementTL = sphere->getPosition() - topLeft;
+		//glm::vec2 displacementTR = sphere->getPosition() - topRight;
+		//glm::vec2 displacementBL = sphere->getPosition() - BottomLeft;
+		//glm::vec2 displacementBR = sphere->getPosition() - BottomRight;
+		//
+		//float overlapTL = (sphere->getRadius() - glm::length(displacementTL));
+		//float overlapTR = (sphere->getRadius() - glm::length(displacementTR));
+		//float overlapBL = (sphere->getRadius() - glm::length(displacementBL));
+		//float overlapBR = (sphere->getRadius() - glm::length(displacementBR));
+		//
+		//glm::vec2 offsetTL = glm::normalize(displacementTL) * overlapTL;
+		//glm::vec2 offsetTR = glm::normalize(displacementTR) * overlapTR;
+		//glm::vec2 offsetBL = glm::normalize(displacementBL) * overlapBL;
+		//glm::vec2 offsetBR = glm::normalize(displacementBR) * overlapBR;
+		//
+		////glm::vec2 overallOffset = offsetBL + offsetBR + offsetTL + offsetTR;
+		//
+		//if (overlapBL > 0)
+		//{
+		//	//sphere->setPosition(sphere->getPosition() - offsetBL * 0.5f);
+		//	//box->setPosition(box->getPosition() + offsetBL * 0.5f);
+		//
+		//	sphere->resolveCollision(box);
+		//	return true;
+		//}
+		//else if (overlapBR > 0)
+		//{
+		//	//sphere->setPosition(sphere->getPosition() - overlapBR * 0.5f);
+		//	//box->setPosition(box->getPosition() + overlapBR * 0.5f);
+		//
+		//	sphere->resolveCollision(box);
+		//	return true;
+		//}
+		//else if (overlapTL > 0)
+		//{
+		//	//sphere->setPosition(sphere->getPosition() - overlapTL * 0.5f);
+		//	//box->setPosition(box->getPosition() + overlapTL * 0.5f);
+		//
+		//	sphere->resolveCollision(box);
+		//	return true;
+		//}
+		//else if (overlapTR > 0)
+		//{
+		//	//sphere->setPosition(sphere->getPosition() - overlapTR * 0.5f);
+		//	//box->setPosition(box->getPosition() + overlapTR * 0.5f);
+		//
+		//	sphere->resolveCollision(box);
+		//	return true;
+		//}
 	}
 	return false;
 }
@@ -305,36 +375,75 @@ bool PhysicsScene::box2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 	if (box1 != nullptr && box2 != nullptr)
 	{
 
-		//float overlapX = (box1->getPosition().x + box1->getExtents().x) + (box2->getPosition().x + box2->getExtents().x)
-		//				- glm::distance(box1->getPosition().x + box1->getExtents().x, box2->getPosition().x + box2->getExtents().x);
-		
-		//float overlapY = (box1->getPosition().y + box1->getExtents().y) + (box2->getPosition().y + box2->getExtents().y)
-		//				- glm::distance(box1->getPosition().y + box1->getExtents().y, box2->getPosition().y + box2->getExtents().y);
 
-		//glm::vec2 overlap(
-		//	box1->getPosition() + box2->getPosition() - glm::distance(box1->getPosition(), box2->getPosition()));
-		
-		//glm::vec2 offset = glm::normalize(box1->getPosition() - box2->getPosition() * overlap);
+		glm::vec2 max1	(box1->getPosition().x + box1->getExtents().x, box1->getPosition().y + box1->getExtents().y);
+		glm::vec2 min1	(box1->getPosition().x - box1->getExtents().x, box1->getPosition().y - box1->getExtents().y);
 
-		if (box1->getPosition().x + box1->getExtents().x < box2->getPosition().x -box2->getExtents().x ||
-			box2->getPosition().x + box2->getExtents().x < box1->getPosition().x -box1->getExtents().x)
-		{
-			return false;
-		}
-		if (box1->getPosition().y + box1->getExtents().y < box2->getPosition().y -box2->getExtents().y ||
-			box2->getPosition().y + box2->getExtents().y < box1->getPosition().y -box1->getExtents().y)
+		glm::vec2 max2	(box2->getPosition().x + box2->getExtents().x, box2->getPosition().y + box2->getExtents().y);
+		glm::vec2 min2	(box2->getPosition().x - box2->getExtents().x, box2->getPosition().y - box2->getExtents().y);
+
+
+
+		glm::vec2 closestPoint1 = glm::clamp(box1->getPosition(), min2, max2);
+		glm::vec2 closestPoint2 = glm::clamp(box2->getPosition(), min1, max1);
+
+		glm::vec2 displacement = closestPoint1 - closestPoint2;
+
+		float overlap = -glm::length(displacement);
+
+		glm::vec2 offset = glm::normalize(displacement) * overlap;
+
+		
+		aie::Gizmos::add2DLine(closestPoint1, closestPoint2,glm::vec4(1,1,1,1));
+
+		if (max1.x < min2.x || max1.y < min2.y ||
+			min1.x > max2.x || min1.y > max2.y)
 		{
 			return false;
 		}
 		else
 		{
-			//box1->setPosition((box1->getPosition() + offset) * 0.5f);
-			//box2->setPosition((box2->getPosition() + -offset) * 0.5f);
+			box1->setPosition(box1->getPosition() - offset * 0.5f);
+			box2->setPosition(box2->getPosition() + offset * 0.5f);
 
 			box1->resolveCollision(box2);
-
-			return true;
 		}
+
+
+
+
+
+		/*old aabb / aabb*/
+
+		//glm::vec2 displacement = box1->getPosition() - box2->getPosition();
+		//
+		//float overlapX = (box1->getPosition().x + box1->getExtents().x) + (box2->getPosition().x + box2->getExtents().x);
+		//float overlapy = (box1->getPosition().y + box1->getExtents().y) + (box2->getPosition().y + box2->getExtents().y);
+		//
+		//glm::vec2 offsetX = glm::normalize(displacement) * overlapX;
+		//glm::vec2 offsetY = glm::normalize(displacement) * overlapy;
+		//
+		//
+		//if (box1->getPosition().x + box1->getExtents().x < box2->getPosition().x -box2->getExtents().x ||
+		//	box2->getPosition().x + box2->getExtents().x < box1->getPosition().x -box1->getExtents().x)
+		//{
+		//	return false;
+		//}
+		//if (box1->getPosition().y + box1->getExtents().y < box2->getPosition().y -box2->getExtents().y ||
+		//	box2->getPosition().y + box2->getExtents().y < box1->getPosition().y -box1->getExtents().y)
+		//{
+		//	return false;
+		//}
+		//else
+		//{
+		//	//box1->setPosition((box1->getPosition().x + offsetX * 0.5f) + (box1->getPosition().y + offsetY * 0.5f));
+		//	//box2->setPosition((box2->getPosition().x + offsetX * 0.5f) + (box2->getPosition().y + offsetY * 0.5f));
+		//
+		//
+		//	box1->resolveCollision(box2);
+		//
+		//	return true;
+		//}
 	}
 	return false;
 }
