@@ -76,7 +76,7 @@ bool PhysicsTestApp::startup() {
 
 	m_physicsScene->addActor(plane5);
 
-	Square* box1 = new Square(glm::vec2(35, 40), glm::vec2(0, 0), 4.0f, glm::vec2(4, 4), glm::vec4(0, 0, 1, 1));
+	Square* box1 = new Square(glm::vec2(35, 45), glm::vec2(0, 0), 4.0f, glm::vec2(4, 4), glm::vec4(0, 0, 1, 1));
 	Square* box2 = new Square(glm::vec2(65, 40), glm::vec2(0, 0), 4.0f, glm::vec2(4, 4), glm::vec4(0, 0, 1, 1));
 
 

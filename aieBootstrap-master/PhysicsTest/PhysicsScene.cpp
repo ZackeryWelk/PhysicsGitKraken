@@ -374,8 +374,6 @@ bool PhysicsScene::box2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 
 	if (box1 != nullptr && box2 != nullptr)
 	{
-
-
 		glm::vec2 max1	(box1->getPosition().x + box1->getExtents().x, box1->getPosition().y + box1->getExtents().y);
 		glm::vec2 min1	(box1->getPosition().x - box1->getExtents().x, box1->getPosition().y - box1->getExtents().y);
 
@@ -383,18 +381,16 @@ bool PhysicsScene::box2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 		glm::vec2 min2	(box2->getPosition().x - box2->getExtents().x, box2->getPosition().y - box2->getExtents().y);
 
 
-
 		glm::vec2 closestPoint1 = glm::clamp(box1->getPosition(), min2, max2);
 		glm::vec2 closestPoint2 = glm::clamp(box2->getPosition(), min1, max1);
 
-		glm::vec2 displacement = closestPoint1 - closestPoint2;
-
-		float overlap = -glm::length(displacement);
+		glm::vec2 displacement = box1->getPosition() - closestPoint1;
+		
+		float overlap = glm::distance(box1->getPosition(), closestPoint2) -glm::length(displacement);
 
 		glm::vec2 offset = glm::normalize(displacement) * overlap;
 
-		
-		aie::Gizmos::add2DLine(closestPoint1, closestPoint2,glm::vec4(1,1,1,1));
+		//aie::Gizmos::add2DLine(closestPoint2, box1->getPosition(),glm::vec4(1,1,1,1));
 
 		if (max1.x < min2.x || max1.y < min2.y ||
 			min1.x > max2.x || min1.y > max2.y)
@@ -403,10 +399,11 @@ bool PhysicsScene::box2Box(PhysicsObject* obj1, PhysicsObject* obj2)
 		}
 		else
 		{
-			box1->setPosition(box1->getPosition() - offset * 0.5f);
-			box2->setPosition(box2->getPosition() + offset * 0.5f);
-
+			box1->setPosition(box1->getPosition() + offset * 0.3f);
+			box2->setPosition(box2->getPosition() - offset * 0.3f);
+			
 			box1->resolveCollision(box2);
+			return true;
 		}
 
 
